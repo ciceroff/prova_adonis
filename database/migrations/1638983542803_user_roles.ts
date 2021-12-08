@@ -6,9 +6,9 @@ export default class UserRoles extends BaseSchema {
   public async up () {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
-      table.integer('user_id').unsigned().references('users.id')
-      table.integer('role_id').unsigned().references('roles.id')
-      
+      table.integer('user_id').unsigned().references('users.id').onDelete('CASCADE')
+      table.integer('role_id').unsigned().references('roles.id').onDelete('CASCADE')
+      table.unique(['user_id','role_id'])
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
