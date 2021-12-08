@@ -22,6 +22,7 @@ export default class User extends BaseModel {
   public updatedAt: DateTime
 
   @manyToMany(()=> Role, {
+    pivotTimestamps: true, 
     pivotTable: 'user_roles'
   })
   public roles: ManyToMany<typeof Role>
