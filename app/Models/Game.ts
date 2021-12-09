@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
+import Bet from './Bet'
 
 export default class Game extends BaseModel {
   @column({ isPrimary: true })
@@ -28,4 +29,7 @@ export default class Game extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
+
+  @belongsTo(() => Bet)
+  public bet: BelongsTo<typeof Bet>
 }

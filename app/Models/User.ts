@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, manyToMany, ManyToMany } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, column, manyToMany, ManyToMany, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
 import Role from 'App/Models/Role'
+import Bet from 'App/Models/Bet'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -26,4 +27,9 @@ export default class User extends BaseModel {
     pivotTable: 'user_roles'
   })
   public roles: ManyToMany<typeof Role>
+
+  @hasMany(() => Bet, {
+    foreignKey: 'user_id',
+  })
+  public bets: HasMany<typeof Bet>
 }
