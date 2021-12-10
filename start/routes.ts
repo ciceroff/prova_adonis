@@ -33,3 +33,10 @@ Route.post('/users', 'UsersController.store')
 Route.get('/users/:id','UsersController.show')
 Route.put('users/:id', 'UsersController.update')
 Route.delete('users/:id', 'UsersController.destroy')
+
+// ROLE
+Route.get('/roles', 'RolesController.index')
+Route.post('/roles', 'RolesController.store')
+Route.get('/roles/:id', 'RolesController.show')
+Route.put('/roles/:id', 'RolesController.update')
+Route.delete('/roles/:id', 'RolesController.destroy')
