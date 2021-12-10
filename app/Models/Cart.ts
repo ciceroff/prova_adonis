@@ -5,8 +5,8 @@ export default class Cart extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 
-  @column()
-  public min_cart_value: number
+  @column({columnName: 'min-cart-value'})
+  public minCartValue: number
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
@@ -14,3 +14,4 @@ export default class Cart extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
 }
+ 

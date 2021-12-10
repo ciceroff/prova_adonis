@@ -8,17 +8,14 @@ export default class Bet extends BaseModel {
   public id: number
 
   @column()
-  public filled_numbers: string
+  public filledNumbers: string
 
   @column()
-  public user_id: number
+  public userId: number
 
   @column()
-  public game_id: number
-  // table.integer('game_id').unsigned().references('games.id').onDelete('cascade').onUpdate('cascade')
-  //     table.integer('user_id').unsigned().references('users.id').onDelete('cascade').onUpdate('cascade')
-  //     table.string('filled_numbers').notNullable()
-  //     table.unique(['game_id','user_id','filled_numbers'])
+  public gameId: number
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 

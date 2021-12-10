@@ -14,7 +14,7 @@ export default class GamesController {
         description, 
         range, 
         price, 
-        max_number, 
+        maxNumber: max_number, 
         color
       })
       return game
@@ -44,7 +44,7 @@ export default class GamesController {
       game.description = description
       game.range = range
       game.price = price
-      game.max_number = max_number
+      game.maxNumber = max_number
       game.color = color
   
       return game.save()
