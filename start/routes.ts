@@ -20,6 +20,9 @@
 
 import Route from '@ioc:Adonis/Core/Route';
 
-Route.get('/', async () => {
-  return { hello: 'world' };
-});
+// GAMES
+Route.get('/games', 'GamesController.index');
+Route.post('/games', 'GamesController.store')
+Route.get('/games/:id', 'GamesController.show')
+Route.put('/games/:id', 'GamesController.update')
+Route.delete('/games/:id', 'GamesController.destroy')
