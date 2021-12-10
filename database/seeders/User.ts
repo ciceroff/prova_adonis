@@ -11,11 +11,11 @@ export default class UserSeeder extends BaseSeeder {
     })
 
     const role = await Role.create({
-      role_name: 'admin'
+      roleName: 'admin'
     })
 
     await Role.create({
-      role_name: 'player'
+      roleName: 'player'
     })
 
     await user.related('roles').attach([role.id])
