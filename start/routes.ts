@@ -26,3 +26,10 @@ Route.post('/games', 'GamesController.store')
 Route.get('/games/:id', 'GamesController.show')
 Route.put('/games/:id', 'GamesController.update')
 Route.delete('/games/:id', 'GamesController.destroy')
+
+// USER
+Route.get('/users', 'UsersController.index')
+Route.post('/users', 'UsersController.store')
+Route.get('/users/:id','UsersController.show')
+Route.put('users/:id', 'UsersController.update')
+Route.delete('users/:id', 'UsersController.destroy')
