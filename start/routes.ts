@@ -20,23 +20,30 @@
 
 import Route from '@ioc:Adonis/Core/Route';
 
-// GAMES
-Route.get('/games', 'GamesController.index');
-Route.post('/games', 'GamesController.store')
-Route.get('/games/:id', 'GamesController.show')
-Route.put('/games/:id', 'GamesController.update')
-Route.delete('/games/:id', 'GamesController.destroy')
-
-// USER
-Route.get('/users', 'UsersController.index')
+Route.post('/login','AuthController.login')
 Route.post('/users', 'UsersController.store')
-Route.get('/users/:id','UsersController.show')
-Route.put('users/:id', 'UsersController.update')
-Route.delete('users/:id', 'UsersController.destroy')
 
-// ROLE
-Route.get('/roles', 'RolesController.index')
-Route.post('/roles', 'RolesController.store')
-Route.get('/roles/:id', 'RolesController.show')
-Route.put('/roles/:id', 'RolesController.update')
-Route.delete('/roles/:id', 'RolesController.destroy')
+Route.group(() => {
+    // GAMES
+    Route.get('/games', 'GamesController.index');
+    Route.post('/games', 'GamesController.store').middleware('admin')
+    Route.get('/games/:id', 'GamesController.show')
+    Route.put('/games/:id', 'GamesController.update').middleware('admin')
+    Route.delete('/games/:id', 'GamesController.destroy').middleware('admin')
+
+    // USER
+    Route.get('/users', 'UsersController.index')
+    Route.get('/users/:id','UsersController.show')
+    Route.put('users/:id', 'UsersController.update')
+    Route.delete('users/:id', 'UsersController.destroy')
+
+    // ROLE
+    Route.group(() => {
+      Route.get('/roles', 'RolesController.index')
+      Route.post('/roles', 'RolesController.store')
+      Route.get('/roles/:id', 'RolesController.show')
+      Route.put('/roles/:id', 'RolesController.update')
+      Route.delete('/roles/:id', 'RolesController.destroy') 
+    }).middleware('admin')
+      
+}).middleware('auth')
