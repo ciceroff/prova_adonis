@@ -1,12 +1,14 @@
 import Mail from '@ioc:Adonis/Addons/Mail'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import User from 'App/Models/User'
+import PasswordValidator from 'App/Validators/newPasswordValidator'
 import crypto from 'crypto'
 import { DateTime } from 'luxon'
 import moment from 'moment'
 
 export default class ForgotPasswordsController {
   public async store({request, response}: HttpContextContract){
+    await request.validate(PasswordValidator)
     try {
       const email = request.input('email')
       const user = await User.findByOrFail('email', email)

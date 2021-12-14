@@ -3,6 +3,7 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Bet from 'App/Models/Bet'
 import Role from 'App/Models/Role'
 import User from 'App/Models/User'
+import UserValidator from 'App/Validators/userValidators'
 import moment from 'moment'
 export default class UsersController {
   public async index({}: HttpContextContract) {
@@ -10,21 +11,27 @@ export default class UsersController {
   }
 
   public async store({request}: HttpContextContract) {
-    const { name, email, password} = request.body()
 
-    const user = await User.create({
-      name,
-      email,
-      password
+    await request.validate(UserValidator)
+    
+    const { name, email, password} = request.body()
+    try{
+      const user = await User.create({
+        name,
+        email,
+        password
     })
-    const role = await Role.findByOrFail('role_name', 'player')
-    await user.related('roles').attach([role.id])
-    await Mail.sendLater((message) => {
-      message.from('loterica@gmail.com').to(user.email).htmlView('emails/welcome', {
-        fullName: user.name,
+      const role = await Role.findByOrFail('role_name', 'player')
+      await user.related('roles').attach([role.id])
+      await Mail.sendLater((message) => {
+        message.from('loterica@gmail.com').to(user.email).htmlView('emails/welcome', {
+          fullName: user.name,
+        })
       })
-    })
-    return user
+      return user
+    }catch(error){
+      return error.detail
+    }
   }
 
   public async show({request, response}: HttpContextContract) {

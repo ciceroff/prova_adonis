@@ -5,6 +5,7 @@ import Bet from 'App/Models/Bet'
 import Cart from 'App/Models/Cart'
 import Game from 'App/Models/Game'
 import Role from 'App/Models/Role'
+import BetValidator from 'App/Validators/betValidator'
 
 export default class BetsController {
   public async index( {auth}: HttpContextContract) {
@@ -24,6 +25,9 @@ export default class BetsController {
   }
 
   public async store({request, response, auth}: HttpContextContract) {
+
+    await request.validate(BetValidator)
+    
     const bets = request.body().bets
     const cart = await Cart.findOrFail(1)      
     let soma: number = 0
