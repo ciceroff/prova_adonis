@@ -37,7 +37,20 @@ export default class UsersController {
     
     const lastMonth = moment().startOf('day').subtract('1', 'month').toDate()
     const bets = await Bet.query().where('user_id', id).where('created_at', '>', lastMonth)
-    return {user, bets}
+    let userBets:[{}] = [{}]
+    userBets.pop()
+    for(let i = 0; i < bets.length; i++){
+      console.log(bets[i])
+      userBets.push({
+        "id" : bets[i].id,
+        "game_id": bets[i].gameId,
+        "user_id": user.id,
+        "filled_numbers": bets[i].filledNumbers.split(',').map(Number),
+        "created_at": bets[i].createdAt,
+        "updated_at": bets[i].updatedAt
+      })
+    }
+    return {user, userBets}
   } 
 
   public async update({request, response}: HttpContextContract) {
