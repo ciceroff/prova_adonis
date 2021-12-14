@@ -1,7 +1,9 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import { beforeFetch } from '@ioc:Adonis/Lucid/Orm'
+import Bet from 'App/Models/Bet'
 import Role from 'App/Models/Role'
 import User from 'App/Models/User'
-
+import moment from 'moment'
 export default class UsersController {
   public async index({}: HttpContextContract) {
     return User.all()
@@ -22,14 +24,16 @@ export default class UsersController {
   }
 
   public async show({request, response}: HttpContextContract) {
-    const {id} = request.params()
+    const { id } = request.params()
 
-    const user = User.findBy('id', id)
-
+    const user = await User.findBy('id', id)
+    
     if(!user)
       return response.badRequest('There is no user with this ID!')
-
-    return user
+    
+    const lastMonth = moment().startOf('day').subtract('1', 'month').toDate()
+    const bets = await Bet.query().where('user_id', id).where('created_at', '>', lastMonth)
+    return {user, bets}
   } 
 
   public async update({request, response}: HttpContextContract) {
