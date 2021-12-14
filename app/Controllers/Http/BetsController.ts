@@ -1,3 +1,4 @@
+import Mail from '@ioc:Adonis/Addons/Mail'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Bet from 'App/Models/Bet'
@@ -26,8 +27,8 @@ export default class BetsController {
     const bets = request.body().bets
     const cart = await Cart.findOrFail(1)      
     let soma: number = 0
-    const userId = auth.use('api').user?.id 
-    if (!userId) return 'Authentication error'
+    const user = auth.use('api').user
+    if (!user) return 'Authentication error'
 
     for(let i = 0; i < bets.length; i++) {
       const game = await Game.findBy('id', bets[i].game_id)
@@ -51,12 +52,18 @@ export default class BetsController {
         return 'You already made this bet, please check out your numbers'
       
         Bet.create({
-        userId,
+        userId: user.id,
         gameId: bets[i].game_id,
         filledNumbers: numbers.toString()
-      }
+        }
         )
+        
     };
+    await Mail.sendLater((message) => {
+      message.from('loterica@gmail.com').to(user.email).htmlView('emails/new_bet', {
+        
+      })
+    })
   }
 
   public async show({response, request, auth}: HttpContextContract) {

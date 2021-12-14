@@ -1,3 +1,4 @@
+import Mail from '@ioc:Adonis/Addons/Mail'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Bet from 'App/Models/Bet'
 import Role from 'App/Models/Role'
@@ -18,7 +19,11 @@ export default class UsersController {
     })
     const role = await Role.findByOrFail('role_name', 'player')
     await user.related('roles').attach([role.id])
-
+    await Mail.sendLater((message) => {
+      message.from('loterica@gmail.com').to(user.email).htmlView('emails/welcome', {
+        fullName: user.name,
+      })
+    })
     return user
   }
 
@@ -44,7 +49,7 @@ export default class UsersController {
       return response.badRequest('There is no user with this ID!')
 
     try {
-
+      
       user.name = name
       user.email = email
       user.password = password
