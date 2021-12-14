@@ -1,5 +1,4 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { beforeFetch } from '@ioc:Adonis/Lucid/Orm'
 import Bet from 'App/Models/Bet'
 import Role from 'App/Models/Role'
 import User from 'App/Models/User'
