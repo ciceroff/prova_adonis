@@ -14,28 +14,41 @@ export default class BetsController {
     
     if(userId && role){
       const check = await Database.from('user_roles').where('user_id', userId).where('role_id', role.id)
-    
-    if(check.length > 0){
-      return Bet.all()
+
+      if(check.length > 0){
+        const bet = await Bet.all()
+        let adminShow:[{}] = [{}]
+        adminShow.pop()
+        console.log(bet)
+        for(let i = 0; i < bet.length; i++){
+          adminShow.push({
+            "id" : bet[i].id,
+            "game_id": bet[i].gameId,
+            "user_id": userId,
+            "filled_numbers": bet[i].filledNumbers.split(',').map(Number),
+            "created_at": bet[i].createdAt,
+            "updated_at": bet[i].updatedAt
+          })
+      }
+        return adminShow
     }
 
-    const bets = await Bet.query().where('user_id', userId)
-    let userBets:[{}] = [{}]
-    userBets.pop()
-    for(let i = 0; i < bets.length; i++){
-      userBets.push({
-        "id" : bets[i].id,
-        "game_id": bets[i].gameId,
-        "user_id": userId,
-        "filled_numbers": bets[i].filledNumbers.split(',').map(Number),
-        "created_at": bets[i].createdAt,
-        "updated_at": bets[i].updatedAt
-      })
-    }
-    return userBets
-    }
+      const bets = await Bet.query().where('user_id', userId)
+      let userBets:[{}] = [{}]
+      userBets.pop()
+      for(let i = 0; i < bets.length; i++){
+        userBets.push({
+          "id" : bets[i].id,
+          "game_id": bets[i].gameId,
+          "user_id": userId,
+          "filled_numbers": bets[i].filledNumbers.split(',').map(Number),
+          "created_at": bets[i].createdAt,
+          "updated_at": bets[i].updatedAt
+        })
+      }
+      return userBets
   }
-
+}
   public async store({request, response, auth}: HttpContextContract) {
 
     await request.validate(BetValidator)
