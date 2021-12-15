@@ -19,8 +19,20 @@ export default class BetsController {
       return Bet.all()
     }
 
-    const bets = Bet.findBy('user_id', userId)
-    return bets
+    const bets = await Bet.query().where('user_id', userId)
+    let userBets:[{}] = [{}]
+    userBets.pop()
+    for(let i = 0; i < bets.length; i++){
+      userBets.push({
+        "id" : bets[i].id,
+        "game_id": bets[i].gameId,
+        "user_id": userId,
+        "filled_numbers": bets[i].filledNumbers.split(',').map(Number),
+        "created_at": bets[i].createdAt,
+        "updated_at": bets[i].updatedAt
+      })
+    }
+    return userBets
     }
   }
 
@@ -52,28 +64,43 @@ export default class BetsController {
       
         const numbers:Array<number> = bets[i].filled_numbers.sort((n1: number, n2: number) => n1 - n2)
       
-      if(await Bet.findBy('filled_numbers', numbers.toString()))
+      const checkBet = await Bet.query().where('filled_numbers', numbers.toString()).where('user_id', user.id).where('game_id', game.id)
+      if(checkBet.length > 0)
         return 'You already made this bet, please check out your numbers'
-      
+      try{
         Bet.create({
         userId: user.id,
         gameId: bets[i].game_id,
         filledNumbers: numbers.toString()
         }
         )
-        
+      }catch(error){
+        console.log('oi')
+        console.log(error)
+        return error.detail
+      }
     };
     await Mail.sendLater((message) => {
       message.from('loterica@gmail.com').to(user.email).htmlView('emails/new_bet', {
         
       })
     })
+    return 'Your bets were succesfully done'
   }
 
   public async show({response, request, auth}: HttpContextContract) {
     const {id} = request.params()
     const userId = auth.use('api').user?.id
-    const bet = await Bet.findBy('id', id)
+    const bet = await Bet.findByOrFail('id', id)
+    let userBet: object
+    userBet = {
+      "id" : bet.id,
+      "game_id": bet.gameId,
+      "user_id": userId,
+      "filled_numbers": bet.filledNumbers.split(',').map(Number),
+      "created_at": bet.createdAt,
+      "updated_at": bet.updatedAt
+    }
     const role = await Role.findByOrFail('role_name', 'admin')
 
     if(!bet)
@@ -82,11 +109,11 @@ export default class BetsController {
     if(userId){
       const check = await Database.from('bets').where('user_id', userId).where('id', bet.id)
 
-      if(check.length > 0) return bet
+      if(check.length > 0) return userBet
 
       const checkAdmin = await Database.from('user_roles').where('user_id', userId).where('role_id', role.id)
 
-      if (checkAdmin.length > 0)  return bet
+      if (checkAdmin.length > 0)  return userBet
 
       return 'This bet does not belong to you'
     }
