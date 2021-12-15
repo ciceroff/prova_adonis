@@ -14,10 +14,10 @@ export default class UserRolesController {
     const role = await Role.findBy('id', role_id)
    
     if(!user)  
-      return response.badRequest('There is no user with this ID!')
+      return response.badRequest({'message':'There is no user with this ID!'})
 
     if(!role) 
-      return response.badRequest('There is no role with this ID!')
+      return response.badRequest({'message':'There is no role with this ID!'})
 
     const checkRelation = await Database.query().from('user_roles').where('user_id', user_id).where('role_id',role_id)
     if(checkRelation.length > 0) return response.badRequest('The user already have this profile type')

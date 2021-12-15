@@ -57,7 +57,7 @@ export default class BetsController {
     const cart = await Cart.findOrFail(1)      
     let soma: number = 0
     const user = auth.use('api').user
-    if (!user) return 'Authentication error'
+    if (!user) return {'message':'Authentication error'}
 
     for(let i = 0; i < bets.length; i++) {
       const game = await Game.findBy('id', bets[i].game_id)
@@ -68,7 +68,7 @@ export default class BetsController {
     };
    
     if(soma < cart.minCartValue)
-      return 'The cart should have at least a $30 price'
+      return response.status(400).json({'message':'The cart should have at least a $30 price'})
     
     for(let i = 0; i < bets.length; i++ ){
       const game = await Game.findByOrFail('id', bets[i].game_id)
@@ -94,6 +94,7 @@ export default class BetsController {
       }
     };
     await Mail.sendLater((message) => {
+      message.subject('New bet registered'),
       message.from('loterica@gmail.com').to(user.email).htmlView('emails/new_bet', {
         
       })
@@ -128,11 +129,9 @@ export default class BetsController {
 
       if (checkAdmin.length > 0)  return userBet
 
-      return 'This bet does not belong to you'
+      return {message: 'This bet does not belong to you'}
     }
   }
-
-  public async update({}: HttpContextContract) {}
 
   public async destroy({request, response, auth}: HttpContextContract) {
     const {id} = request.params()
@@ -141,7 +140,7 @@ export default class BetsController {
     const role = await Role.findByOrFail('role_name', 'admin')
 
     if(!bet)
-      return response.badRequest('There is no bet with this ID!')
+      return response.badRequest({'message':'There is no bet with this ID!'})
 
     if(userId){
       const check = await Database.from('bets').where('user_id', userId).where('id', bet.id)
@@ -152,9 +151,9 @@ export default class BetsController {
 
       if (checkAdmin.length > 0) bet.delete()
       else
-      return 'This bet does not belong to you'
+      return response.status(403).json({'message': 'This bet does not belong to you'})
     }
 
-    return 'Bet succesfully deleted'
+    return response.status(200).json({'message': 'Bet succesfully deleted'})
   }
 }

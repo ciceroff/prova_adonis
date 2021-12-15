@@ -10,7 +10,7 @@ export default class Admin{
     if(userId && role){
       const check = await Database.from('user_roles').where('user_id', userId).where('role_id', role.id)
     if(check.length == 0){
-      return response.unauthorized('Only admin user have access to this method')
+      return response.unauthorized({'message':'Only admin user have access to this method'})
     }
     await next()
   }

@@ -24,7 +24,7 @@ export default class RolesController {
     const role = await Role.findBy('id', id)
 
     if(!role)
-      return response.badRequest('There is no role with this ID!')
+      return response.badRequest({'message':'There is no role with this ID!'})
     
     return role
   }
@@ -35,7 +35,7 @@ export default class RolesController {
     const role = await Role.findBy('id', id)
 
     if(!role)
-      return response.badRequest('There is no role with this ID!')
+      return response.badRequest({'message':'There is no role with this ID!'})
     role.roleName = role_name
     role.save()
     return role
@@ -47,7 +47,7 @@ export default class RolesController {
     const role = await Role.findBy('id',id)
 
     if(!role)
-      return response.badRequest('There is no role with this ID!')
+      return response.badRequest({'message':'There is no role with this ID!'})
 
     role.delete()
     return {message: "Role succesfully deleted"}

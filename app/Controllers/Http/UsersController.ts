@@ -1,5 +1,6 @@
 import Mail from '@ioc:Adonis/Addons/Mail'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import Database from '@ioc:Adonis/Lucid/Database'
 import Bet from 'App/Models/Bet'
 import Role from 'App/Models/Role'
 import User from 'App/Models/User'
@@ -24,6 +25,7 @@ export default class UsersController {
       const role = await Role.findByOrFail('role_name', 'player')
       await user.related('roles').attach([role.id])
       await Mail.sendLater((message) => {
+        message.subject('Welcome'),
         message.from('loterica@gmail.com').to(user.email).htmlView('emails/welcome', {
           fullName: user.name,
         })
@@ -40,7 +42,7 @@ export default class UsersController {
     const user = await User.findBy('id', id)
     
     if(!user)
-      return response.badRequest('There is no user with this ID!')
+      return response.badRequest({'message':'There is no user with this ID!'})
     
     const lastMonth = moment().startOf('day').subtract('1', 'month').toDate()
     const bets = await Bet.query().where('user_id', id).where('created_at', '>', lastMonth)
@@ -59,35 +61,53 @@ export default class UsersController {
     return {user, userBets}
   } 
 
-  public async update({request, response}: HttpContextContract) {
+  public async update({request, response, auth}: HttpContextContract) {
     const {id} = request.params()
     const {name, email, password} = request.body()
     const user = await User.findBy('id', id)
+    const userId = auth.use('api').user?.id
+    const role = await Role.findByOrFail('role_name', 'admin')
 
     if(!user)
-      return response.badRequest('There is no user with this ID!')
+      return response.badRequest({'message':'There is no user with this ID!'})
 
-    try {
-      
-      user.name = name
-      user.email = email
-      user.password = password
-      user.save()
-      return user
+    if(userId && role){
+      const check = await Database.from('user_roles').where('user_id', userId).where('role_id', role.id)
+      if(check.length > 0 || id === userId){
+        try {
+          
+          user.name = name
+          user.email = email
+          user.password = password
+          user.save()
+          return user
 
-    } catch (error) {
-      return error.detail
+        } catch (error) {
+          return error.detail
+        }
+      }else{
+        return response.status(405).json({'message': 'Only the admin or the user himself have access to this method'})
+      }
     }
   }
 
-  public async destroy({request, response}: HttpContextContract) {
-    const {id} = request.params()
-    const user = await User.findBy('id', id)
+  public async destroy({request, response, auth}: HttpContextContract) {
+    const userId = auth.use('api').user?.id
+    const role = await Role.findByOrFail('role_name', 'admin')
+    if(userId && role){
+      const check = await Database.from('user_roles').where('user_id', userId).where('role_id', role.id)
+      const {id} = request.params()
+      const user = await User.findBy('id', id)
 
-    if(!user)
-      return response.badRequest('There is no user with this ID!')
-
-    user.delete()
-    return {message: "User succesfully deleted"}
+      if(!user)
+        return response.badRequest({'message':'There is no user with this ID!'})
+      
+      if(check.length > 0 || id === userId){
+        user.delete()
+        return {message: "User succesfully deleted"}
+      }else{
+        return response.status(405).json({'message':'Only the admin or the user himself have access to this method'})
+      }
+    }
   }
 }

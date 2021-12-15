@@ -22,16 +22,27 @@ export default class NewBet extends BaseTask {
 		const users = await User.query().select('*')
 		
 		for(let i = 0; i< users.length; i++){
+			const userNoBet = await Bet.findBy('user_id', users[i].id)
+			if(!userNoBet){
+				if(moment(lastWeek).isAfter(users[i].createdAt)){
+					return Mail.sendLater((message) => {
+						message.subject("Don't forget about us"),
+						message.from('loterica@gmail.com').to(users[i].email).htmlView('emails/late_bet')
+					})	
+				}
+			}
 			const bets = await Bet.query().select('*').orderBy('created_at', 'desc')
 			.where('user_id', users[i].id)
 			.limit(1)
 			.where('created_at', '<', lastWeek)
 			
 			if(bets.length > 0){
+				
 				await Mail.sendLater((message) => {
+					message.subject("Don't forget about us"),
 					message.from('loterica@gmail.com').to(users[i].email).htmlView('emails/late_bet')
 				})
-				// this.logger.info( bets)
+				//this.logger.info( bets)
 			}
 		}
 		

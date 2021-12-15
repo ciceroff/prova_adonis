@@ -46,6 +46,7 @@ Route.group(() => {
       Route.get('/roles/:id', 'RolesController.show')
       Route.put('/roles/:id', 'RolesController.update')
       Route.delete('/roles/:id', 'RolesController.destroy') 
+      Route.put('cart', 'CartsController.update')
     }).middleware('admin')
     
     // BETS

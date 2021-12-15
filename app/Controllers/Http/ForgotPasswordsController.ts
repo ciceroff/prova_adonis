@@ -17,12 +17,13 @@ export default class ForgotPasswordsController {
       await user.save()
 
       await Mail.sendLater((message) => {
+        message.subject('Password recovery'),
         message.from('loterica@gmail.com').to(user.email).htmlView('emails/password', {
           email,
           token: user.token
         })
       })
-      
+      return response.status(204)
     }catch(error){
       return response.status(error.status).send('Something went wrong. Please check your email')
     }
@@ -43,6 +44,7 @@ export default class ForgotPasswordsController {
       user.tokenCreatedAt = null
       user.password = password
       await user.save()
+      return response.status(204)
     } catch (error) {
       return response.status(error.status).send('Something went wrong. Please check your email')
     }
