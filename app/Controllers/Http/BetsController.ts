@@ -19,7 +19,7 @@ export default class BetsController {
         const bet = await Bet.all()
         let adminShow:[{}] = [{}]
         adminShow.pop()
-        console.log(bet)
+        
         for(let i = 0; i < bet.length; i++){
           adminShow.push({
             "id" : bet[i].id,
