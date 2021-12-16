@@ -62,7 +62,7 @@ export default class BetsController {
     for(let i = 0; i < bets.length; i++) {
       const game = await Game.findBy('id', bets[i].game_id)
       if (!game)
-        return response.badRequest(`There is no game with ID: ${bets[i].game_id}`)
+        return response.badRequest({'message':`There is no game with ID: ${bets[i].game_id}`})
       soma += game.price
       
     };
@@ -79,7 +79,7 @@ export default class BetsController {
       
       const checkBet = await Bet.query().where('filled_numbers', numbers.toString()).where('user_id', user.id).where('game_id', game.id)
       if(checkBet.length > 0)
-        return 'You already made this bet, please check out your numbers'
+        return {'message':'You already made this bet, please check out your numbers'}
       try{
         Bet.create({
         userId: user.id,
@@ -99,7 +99,7 @@ export default class BetsController {
         
       })
     })
-    return 'Your bets were succesfully done'
+    return {'message':'Your bets were succesfully done'}
   }
 
   public async show({response, request, auth}: HttpContextContract) {
