@@ -67,8 +67,8 @@ export default class BetsController {
       
     };
    
-    if(soma < cart.minCartValue)
-      return response.status(400).json({'message':'The cart should have at least a $30 price'})
+    // if(soma < cart.minCartValue)
+    //   return response.status(400).json({'message':'The cart should have at least a $30 price'})
     
     for(let i = 0; i < bets.length; i++ ){
       const game = await Game.findByOrFail('id', bets[i].game_id)
