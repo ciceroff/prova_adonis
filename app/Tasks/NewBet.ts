@@ -31,7 +31,7 @@ export default class NewBet extends BaseTask {
 				await Mail.sendLater((message) => {
 					message.from('loterica@gmail.com').to(users[i].email).htmlView('emails/late_bet')
 				})
-				this.logger.info( bets)
+				// this.logger.info( bets)
 			}
 		}
 		

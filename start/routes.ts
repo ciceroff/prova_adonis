@@ -24,6 +24,7 @@ Route.post('/login','AuthController.login')
 Route.post('/users', 'UsersController.store')
 Route.post('/passwords', 'ForgotPasswordsController.store')
 Route.put('/passwords', 'ForgotPasswordsController.update')
+
 Route.group(() => {
     // GAMES
     Route.get('/games', 'GamesController.index');
@@ -52,5 +53,8 @@ Route.group(() => {
     Route.get('/bets/:id', 'BetsController.show')
     Route.delete('/bets/:id', 'BetsController.destroy')
     Route.post('/bets', 'BetsController.store')
+
+    // PROFILE
+    Route.post('/profiles', 'UserRolesController.store').middleware('admin')
     
 }).middleware('auth')
