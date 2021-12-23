@@ -9,7 +9,7 @@
   ],
   "compilerOptions": {
     "outDir": "build",
-    "rootDir": "./",
+    // "rootDir": "./",
     "sourceMap": true,
     "paths": {
       "App/*": [
@@ -31,7 +31,8 @@
       "@adonisjs/lucid",
       "@adonisjs/auth",
       "@adonisjs/mail",
-      "@adonisjs/view"
+      "@adonisjs/view",
+      "adonis5-scheduler"
     ]
   }
 }

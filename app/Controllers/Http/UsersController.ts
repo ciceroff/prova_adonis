@@ -40,7 +40,6 @@ export default class UsersController {
     let userBets:[{}] = [{}]
     userBets.pop()
     for(let i = 0; i < bets.length; i++){
-      console.log(bets[i])
       userBets.push({
         "id" : bets[i].id,
         "game_id": bets[i].gameId,
