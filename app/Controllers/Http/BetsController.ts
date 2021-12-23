@@ -6,6 +6,7 @@ import Cart from 'App/Models/Cart'
 import Game from 'App/Models/Game'
 import Role from 'App/Models/Role'
 import BetValidator from 'App/Validators/betValidator'
+import { Kafka } from 'kafkajs'
 
 export default class BetsController {
   public async index( {auth}: HttpContextContract) {
@@ -51,6 +52,10 @@ export default class BetsController {
 }
   public async store({request, response, auth}: HttpContextContract) {
 
+    const kafka = new Kafka({
+      brokers: ['localhost:9092'],
+    });
+  
     await request.validate(BetValidator)
     
     const bets = request.body().bets
@@ -67,8 +72,8 @@ export default class BetsController {
       
     };
    
-    // if(soma < cart.minCartValue)
-    //   return response.status(400).json({'message':'The cart should have at least a $30 price'})
+    if(soma < cart.minCartValue)
+      return response.status(400).json({'message':'The cart should have at least a $30 price'})
     
     for(let i = 0; i < bets.length; i++ ){
       const game = await Game.findByOrFail('id', bets[i].game_id)
@@ -87,6 +92,16 @@ export default class BetsController {
         filledNumbers: numbers.toString()
         }
         )
+
+        const producer = kafka.producer();
+    
+        await producer.connect();
+        await producer.send({
+          topic: 'test-topic',
+          messages: [{ value: 'Hello KafkaJS user!' }],
+        });
+        
+        await producer.disconnect();
       }catch(error){
         console.log('oi')
         console.log(error)
