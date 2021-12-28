@@ -1,4 +1,3 @@
-import Mail from '@ioc:Adonis/Addons/Mail'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Bet from 'App/Models/Bet'
@@ -6,12 +5,17 @@ import Role from 'App/Models/Role'
 import User from 'App/Models/User'
 import UserValidator from 'App/Validators/userValidators'
 import moment from 'moment'
+import { Kafka } from 'kafkajs'
 export default class UsersController {
   public async index({}: HttpContextContract) {
     return User.all()
   }
 
   public async store({request}: HttpContextContract) {
+
+    const kafka = new Kafka({
+      brokers: ['localhost:9092']
+    })
 
     await request.validate(UserValidator)
     
@@ -24,12 +28,23 @@ export default class UsersController {
     })
       const role = await Role.findByOrFail('role_name', 'player')
       await user.related('roles').attach([role.id])
-      await Mail.sendLater((message) => {
-        message.subject('Welcome'),
-        message.from('loterica@gmail.com').to(user.email).htmlView('emails/welcome', {
-          fullName: user.name,
-        })
+      const producer = kafka.producer()
+      
+      await producer.connect()
+     
+      await producer.send({
+        topic: 'new-user',
+        messages:[
+          {value: JSON.stringify(user)},
+        ]
       })
+      // await Mail.sendLater((message) => {
+      //   message.subject('Welcome'),
+      //   message.from('loterica@gmail.com').to(user.email).htmlView('emails/welcome', {
+      //     fullName: user.name,
+      //   })
+      // })
+      
       return user
     }catch(error){
       return error.detail
