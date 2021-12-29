@@ -1,8 +1,8 @@
-import Mail from '@ioc:Adonis/Addons/Mail'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import User from 'App/Models/User'
 import PasswordValidator from 'App/Validators/newPasswordValidator'
 import crypto from 'crypto'
+import { Kafka } from 'kafkajs'
 import { DateTime } from 'luxon'
 import moment from 'moment'
 
@@ -10,19 +10,34 @@ export default class ForgotPasswordsController {
   public async store({request, response}: HttpContextContract){
     await request.validate(PasswordValidator)
     try {
+      const kafka = new Kafka({
+        brokers: ['kafka:29092']
+      })
+
       const email = request.input('email')
       const user = await User.findByOrFail('email', email)
       user.token = crypto.randomBytes(10).toString('hex')
       user.tokenCreatedAt = DateTime.now()
       await user.save()
 
-      await Mail.sendLater((message) => {
-        message.subject('Password recovery'),
-        message.from('loterica@gmail.com').to(user.email).htmlView('emails/password', {
-          email,
-          token: user.token
-        })
+      const producer = kafka.producer()
+      
+      await producer.connect()
+      
+      await producer.send({
+        topic: 'password-recovery',
+        messages:[
+          {value: JSON.stringify(user)},
+        ]
       })
+      await producer.disconnect()
+      // await Mail.sendLater((message) => {
+      //   message.subject('Password recovery'),
+      //   message.from('loterica@gmail.com').to(user.email).htmlView('emails/password', {
+      //     email,
+      //     token: user.token
+      //   })
+      // })
       return response.status(204)
     }catch(error){
       return response.status(error.status).send('Something went wrong. Please check your email')

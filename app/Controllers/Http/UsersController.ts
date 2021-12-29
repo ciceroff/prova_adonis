@@ -14,7 +14,7 @@ export default class UsersController {
   public async store({request}: HttpContextContract) {
 
     const kafka = new Kafka({
-      brokers: ['localhost:9092']
+      brokers: ['kafka:29092']
     })
 
     await request.validate(UserValidator)
@@ -31,20 +31,14 @@ export default class UsersController {
       const producer = kafka.producer()
       
       await producer.connect()
-     
+      
       await producer.send({
         topic: 'new-user',
         messages:[
           {value: JSON.stringify(user)},
         ]
       })
-      // await Mail.sendLater((message) => {
-      //   message.subject('Welcome'),
-      //   message.from('loterica@gmail.com').to(user.email).htmlView('emails/welcome', {
-      //     fullName: user.name,
-      //   })
-      // })
-      
+      await producer.disconnect()
       return user
     }catch(error){
       return error.detail

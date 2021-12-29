@@ -1,7 +1,7 @@
-import Mail from '@ioc:Adonis/Addons/Mail'
 import {BaseTask} from 'adonis5-scheduler/build'
 import Bet from 'App/Models/Bet'
 import User from 'App/Models/User'
+import { Kafka } from 'kafkajs'
 import moment from 'moment'
 
 export default class NewBet extends BaseTask {
@@ -17,6 +17,10 @@ export default class NewBet extends BaseTask {
 	}
 
 	public async handle() {
+		const kafka = new Kafka({
+			brokers: ['kafka:29092'],
+		  });
+		
 		const lastWeek = moment().startOf('day').subtract('1', 'week').toDate()
     	
 		const users = await User.query().select('*')
@@ -25,10 +29,15 @@ export default class NewBet extends BaseTask {
 			const userNoBet = await Bet.findBy('user_id', users[i].id)
 			if(!userNoBet){
 				if(moment(lastWeek).isAfter(users[i].createdAt)){
-					return Mail.sendLater((message) => {
-						message.subject("Don't forget about us"),
-						message.from('loterica@gmail.com').to(users[i].email).htmlView('emails/late_bet')
-					})	
+          const producer = kafka.producer();
+          await producer.connect();
+          await producer.send({
+            topic: 'user-no-bet',
+            messages: [
+              { value: JSON.stringify(users[i])}
+            ],
+          });
+				
 				}
 			}
 			const bets = await Bet.query().select('*').orderBy('created_at', 'desc')
@@ -37,12 +46,15 @@ export default class NewBet extends BaseTask {
 			.where('created_at', '<', lastWeek)
 			
 			if(bets.length > 0){
+				const producer = kafka.producer();
+          await producer.connect();
+          await producer.send({
+            topic: 'user-no-bet',
+            messages: [
+              { value: JSON.stringify(users[i])}
+            ],
+          });
 				
-				await Mail.sendLater((message) => {
-					message.subject("Don't forget about us"),
-					message.from('loterica@gmail.com').to(users[i].email).htmlView('emails/late_bet')
-				})
-				//this.logger.info( bets)
 			}
 		}
 		

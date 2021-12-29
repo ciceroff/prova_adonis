@@ -1,4 +1,7 @@
 version: '3'
+networks:
+  my-net:
+    external: true
 services:
   database:
     image: postgres
@@ -6,6 +9,8 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: pgdb
       POSTGRES_DB: prova_adonis
+    networks:
+      - my-net
     ports:
       - '5433:5432'
   app:
@@ -17,3 +22,5 @@ services:
       - '3333:3333'
     volumes:
       - .:/usr/app
+    networks:
+      - my-net

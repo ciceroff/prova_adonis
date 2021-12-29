@@ -1,10 +1,10 @@
-import Mail from '@ioc:Adonis/Addons/Mail'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Bet from 'App/Models/Bet'
 import Cart from 'App/Models/Cart'
 import Game from 'App/Models/Game'
 import Role from 'App/Models/Role'
+import User from 'App/Models/User'
 import BetValidator from 'App/Validators/betValidator'
 import { Kafka } from 'kafkajs'
 
@@ -53,7 +53,7 @@ export default class BetsController {
   public async store({request, response, auth}: HttpContextContract) {
 
     const kafka = new Kafka({
-      brokers: ['localhost:9092'],
+      brokers: ['kafka:29092'],
     });
   
     await request.validate(BetValidator)
@@ -75,6 +75,16 @@ export default class BetsController {
     if(soma < cart.minCartValue)
       return response.status(400).json({'message':'The cart should have at least a $30 price'})
     
+    const adminId = await Database.query().from('user_roles').select('user_id').where('role_id', 1)
+    let admins: [{}] = [{}] 
+    admins.pop()
+    
+    for (let i = 0; i < adminId.length; i++){
+      const user = await User.findByOrFail('id', adminId[i].user_id)
+      admins.push(user['$attributes'])
+    }
+    console.log('admins:', admins)
+    console.log(user)
     for(let i = 0; i < bets.length; i++ ){
       const game = await Game.findByOrFail('id', bets[i].game_id)
       if (!game)
@@ -93,27 +103,35 @@ export default class BetsController {
         }
         )
 
-        const producer = kafka.producer();
-    
-        await producer.connect();
-        await producer.send({
-          topic: 'test-topic',
-          messages: [{ value: 'Hello KafkaJS user!' }],
-        });
         
-        await producer.disconnect();
+        
       }catch(error){
         console.log('oi')
         console.log(error)
         return error.detail
       }
     };
-    await Mail.sendLater((message) => {
-      message.subject('New bet registered'),
-      message.from('loterica@gmail.com').to(user.email).htmlView('emails/new_bet', {
+    const producer = kafka.producer();
+    
+    await producer.connect();
+    await producer.send({
+      topic: 'admin-warn',
+      messages: [
+        { value: JSON.stringify({admins, user: user['$attributes'], length: bets.length})}
+      ],
+    });
+    await producer.send({
+      topic: 'new-bet',
+       messages: [{ value: JSON.stringify(user) }],
+    });
         
-      })
-    })
+    await producer.disconnect();
+    // await Mail.sendLater((message) => {
+    //   message.subject('New bet registered'),
+    //   message.from('loterica@gmail.com').to(user.email).htmlView('emails/new_bet', {
+        
+    //   })
+    // })
     return {'message':'Your bets were succesfully done'}
   }
 
