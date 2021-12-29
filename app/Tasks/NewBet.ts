@@ -28,16 +28,16 @@ export default class NewBet extends BaseTask {
 		for(let i = 0; i< users.length; i++){
 			const userNoBet = await Bet.findBy('user_id', users[i].id)
 			if(!userNoBet){
-				if(moment(lastWeek).isAfter(users[i].createdAt)){
-          const producer = kafka.producer();
-          await producer.connect();
-          await producer.send({
-            topic: 'user-no-bet',
-            messages: [
-              { value: JSON.stringify(users[i])}
-            ],
-          });
-				
+				if(moment(lastWeek).isAfter(users[i]['$attributes'].createdAt)){
+  
+					const producer = kafka.producer();
+					await producer.connect();
+					await producer.send({
+						topic: 'user-no-bet',
+						messages: [
+						{ value: JSON.stringify(users[i])}
+						],
+          	});
 				}
 			}
 			const bets = await Bet.query().select('*').orderBy('created_at', 'desc')
@@ -57,6 +57,5 @@ export default class NewBet extends BaseTask {
 				
 			}
 		}
-		
   	}
 }

@@ -31,13 +31,6 @@ export default class ForgotPasswordsController {
         ]
       })
       await producer.disconnect()
-      // await Mail.sendLater((message) => {
-      //   message.subject('Password recovery'),
-      //   message.from('loterica@gmail.com').to(user.email).htmlView('emails/password', {
-      //     email,
-      //     token: user.token
-      //   })
-      // })
       return response.status(204)
     }catch(error){
       return response.status(error.status).send('Something went wrong. Please check your email')

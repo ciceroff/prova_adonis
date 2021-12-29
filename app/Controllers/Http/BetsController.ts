@@ -83,8 +83,6 @@ export default class BetsController {
       const user = await User.findByOrFail('id', adminId[i].user_id)
       admins.push(user['$attributes'])
     }
-    console.log('admins:', admins)
-    console.log(user)
     for(let i = 0; i < bets.length; i++ ){
       const game = await Game.findByOrFail('id', bets[i].game_id)
       if (!game)
@@ -102,12 +100,7 @@ export default class BetsController {
         filledNumbers: numbers.toString()
         }
         )
-
-        
-        
       }catch(error){
-        console.log('oi')
-        console.log(error)
         return error.detail
       }
     };
@@ -126,12 +119,6 @@ export default class BetsController {
     });
         
     await producer.disconnect();
-    // await Mail.sendLater((message) => {
-    //   message.subject('New bet registered'),
-    //   message.from('loterica@gmail.com').to(user.email).htmlView('emails/new_bet', {
-        
-    //   })
-    // })
     return {'message':'Your bets were succesfully done'}
   }
 
